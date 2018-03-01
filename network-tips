@@ -1,0 +1,13 @@
+* change vcenter https proxy:
+- com.vmware.appliance.version1.networking.proxy.set --protocol https --server 10.62.91.86 --port 3128
+
+* add network rule for specific port:
+- sudo iptables -A INPUT -i ens20f0 -p udp --sport 53 -m state --state ESTABLISHED -j ACCEPT
+- sudo iptables -A OUTPUT -o ens20f0 -p udp --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+- sudo iptables -A INPUT -i ens20f0 -p tcp --sport 53 -m state --state ESTABLISHED -j ACCEPT
+- sudo iptables -A OUTPUT -o ens20f0 -p tcp --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+
+* create NAT routing rule:
+- sudo iptables -t nat -A POSTROUTING ! -d 192.168.88.0/24 -o ens20f0 -j MASQUERADE
+- sudo iptables -t nat -A POSTROUTING ! -d 192.168.18.0/24 -o eth0 -j MASQUERADE
+- sudo iptables -t nat -A POSTROUTING ! -d 192.168.101.0/24 -o eth1 -j MASQUERADE
