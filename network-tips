@@ -11,3 +11,45 @@
 - sudo iptables -t nat -A POSTROUTING ! -d 192.168.88.0/24 -o ens20f0 -j MASQUERADE
 - sudo iptables -t nat -A POSTROUTING ! -d 192.168.18.0/24 -o eth0 -j MASQUERADE
 - sudo iptables -t nat -A POSTROUTING ! -d 192.168.101.0/24 -o eth1 -j MASQUERADE
+
+* create portforward rule:
+#!/usr/bin/env sh
+
+nat(){
+    iptables -t nat -A POSTROUTING ! -d $1/$2 -o $3 -j MASQUERADE
+}
+
+preinit() {
+    iptables -t nat -F PREROUTING
+    iptables -t nat -F POSTROUTING
+}
+
+
+forward() {
+    iptables -A PREROUTING -t nat -p tcp --dport $3 -j DNAT --to $1:$2
+    iptables -t nat -A POSTROUTING  -d $1 -p tcp --dport $2 -j MASQUERADE
+}
+
+preinit
+
+nat "192.168.101.0" "24" "eth1"
+nat "192.168.102.0" "24" "eth2"
+nat "192.168.103.0" "24" "eth3"
+
+forward "192.168.101.203" "5005" "15005"
+forward "192.168.101.203" "5006" "15006"
+forward "192.168.101.203" "5007" "15007"
+forward "192.168.101.203" "5008" "15008"
+forward "192.168.101.203" "5009" "15009"
+
+forward "192.168.102.203" "5005" "25005"
+forward "192.168.102.203" "5006" "25006"
+forward "192.168.102.203" "5007" "25007"
+forward "192.168.102.203" "5008" "25008"
+forward "192.168.102.203" "5009" "25009"
+
+forward "192.168.103.203" "5005" "35005"
+forward "192.168.103.203" "5006" "35006"
+forward "192.168.103.203" "5007" "35007"
+forward "192.168.103.203" "5008" "35008"
+forward "192.168.103.203" "5009" "35009"
